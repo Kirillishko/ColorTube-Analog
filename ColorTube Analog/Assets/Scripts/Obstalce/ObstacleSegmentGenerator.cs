@@ -28,7 +28,7 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 	private void Update()
 	{
 		//CreateMesh();
-		GenerateShape(InnerRadius, OuterRadius, angleDegree);
+		GenerateShapeVerticles(InnerRadius, OuterRadius, angleDegree);
 	}
 
 	[ContextMenu("CreateMesh")]
@@ -228,10 +228,6 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 
 	public void Generate()
 	{
-		gameObjects.ForEach(gameObject => Destroy(gameObject));
-		gameObjects.Clear();
-
-
 		int num = (segments * 2 + 2) * 2;
 		Vector3[] verticles = new Vector3[num];
 		Vector2[] uv = new Vector2[num];
@@ -239,17 +235,16 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 		List<int> triangles0 = new List<int>();
 		List<int> triangles1 = new List<int>();
 
-		float num2 = (float)Mathf.PI / 180f * angleDegree;
-		float num3 = num2 / (float)segments;
-		float num4 = num2;
+		float degrees = (float)Mathf.PI / 180f * angleDegree;
+		float onePartDegree = degrees / (float)segments;
 
-		//for (int i = 0; i < 2; i++)
-		//      {
-		//	GenerateShape
-		//      }
+		GenerateShapeVerticles(InnerRadius, OuterRadius, degrees);
+		degrees -= onePartDegree;
+		GenerateShapeVerticles(InnerRadius, OuterRadius, degrees);
+
 	}
 
-	private void GenerateShape(float innerRadius, float outerRadius, float angleDegree)
+	private void GenerateShapeVerticles(float innerRadius, float outerRadius, float angleDegree)
 	{
 		List<Vector3> verticles = new List<Vector3>();
 		List<int> triangles = new List<int>();
@@ -258,45 +253,69 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 		float cos = Mathf.Cos(angleDegree);
 		float sin = Mathf.Sin(angleDegree);
 
-		//GameObject temp;
-
 		verticles.Add(new Vector3(innerRadius * cos, innerRadius * sin, 0.5f));
-		//temp = Instantiate(template, verticles[0], Quaternion.identity);
-		//temp.transform.localScale *= 1.1f;
-		//temp.name = "0";
-
 		verticles.Add(new Vector3(innerRadius * cos, innerRadius * sin, 0));
-		//temp = Instantiate(template, verticles[1], Quaternion.identity);
-		//temp.transform.localScale *= 1.3f;
-		//temp.name = "1";
-
 		verticles.Add(new Vector3(outerRadius * cos, outerRadius * sin, 0.5f));
-		//temp = Instantiate(template, verticles[2], Quaternion.identity);
-		//temp.transform.localScale *= 1.5f;
-		//temp.name = "2";
-
 		verticles.Add(new Vector3(outerRadius * cos, outerRadius * sin, 0));
-		//temp = Instantiate(template, verticles[3], Quaternion.identity);
-		//temp.transform.localScale *= 1.7f;
-		//temp.name = "3";
 
-		// for
+		// up
 		// 2, 1, 0,
 		// 1, 2, 3
-		triangles.Add(0);
-		triangles.Add(1);
-		triangles.Add(2);
-		triangles.Add(2);
-		triangles.Add(3);
-		triangles.Add(1);
+		// down
+		// 0, 1, 2,
+		// 3, 2, 1
+		//triangles.Add(0);
+		//triangles.Add(1);
+		//triangles.Add(2);
+		//triangles.Add(2);
+		//triangles.Add(3);
+		//triangles.Add(1);
+	}
 
-		Mesh mesh = new Mesh();
-		GetComponent<MeshFilter>().mesh = mesh;
+	private List<int> GenerateShapeTriangles(int verticlesCount)
+    {
+		List<int> triangles = new List<int>();
+		int startIndex = verticlesCount - 4;
 
-		mesh.vertices = verticles.ToArray();
-		mesh.triangles = Triangles.ToArray();
+		for (int i = 0; i < 3; i++)
+        {
+			triangles.Add(startIndex);
+			startIndex += 1;
+		}
 
-		mesh.RecalculateNormals();
+		for (int i = 0; i < 3; i++)
+		{
+			triangles.Add(startIndex);
+			startIndex -= 1;
+		}
+
+		return triangles;
+	}
+
+	// Должен создавать только треугольники, т.к точки уже есть
+	private List<int> GenerateShapeConnection(int verticlesCount)
+	{
+		List<int> triangles = new List<int>();
+		int startIndex = verticlesCount - 8;
+
+		for (int i = 0; i < 2; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				triangles.Add(startIndex);
+				startIndex += 2;
+			}
+
+			for (int j = 0; j < 2; j++)
+			{
+				triangles.Add(startIndex);
+				startIndex -= 2;
+			}
+
+			startIndex = 1;
+		}
+
+		return triangles;
 	}
 
 	private void SetMesh(Vector3[] verticles, List<int> triangles0, List<int> triangles1, Vector2[] uv, Vector3[] normals, int debug)
