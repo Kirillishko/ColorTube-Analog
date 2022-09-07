@@ -4,15 +4,25 @@ using UnityEngine;
 
 public class ObstacleRotator : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private Vector2 _speedRotateRange;
+
+    private float _speedRotate;
+    private float _direction;
+
+    private void Start()
     {
-        
+        _speedRotate = Random.Range(_speedRotateRange.x, _speedRotateRange.y);
+        _direction = Random.Range(0, 2) * 2 - 1;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void FixedUpdate()
     {
-        
+        Rotate(_speedRotate, _direction);
+    }
+
+    private void Rotate(float speed, float direction)
+    {
+        Quaternion rotation = Quaternion.AngleAxis(direction * speed, Vector3.forward);
+        transform.rotation *= rotation;
     }
 }

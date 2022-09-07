@@ -23,12 +23,13 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 	private void Awake()
 	{
 		//GenerateShape(InnerRadius, OuterRadius, angleDegree);
+		//GenerateShapeVerticles(InnerRadius, OuterRadius, angleDegree);
 	}
 
 	private void Update()
 	{
 		//CreateMesh();
-		GenerateShapeVerticles(InnerRadius, OuterRadius, angleDegree);
+		CreateMesh();
 	}
 
 	[ContextMenu("CreateMesh")]
@@ -270,6 +271,20 @@ public class ObstacleSegmentGenerator : MonoBehaviour
 		//triangles.Add(2);
 		//triangles.Add(3);
 		//triangles.Add(1);
+
+		Mesh mesh = new Mesh();
+		GetComponent<MeshFilter>().mesh = mesh;
+
+		mesh.vertices = verticles.ToArray();
+
+		//List<int> trianglesBoth = new List<int>();
+		//trianglesBoth.AddRange(triangles0);
+		//trianglesBoth.AddRange(triangles1);
+
+		mesh.triangles = Triangles.ToArray();
+
+		if (RecalculateNormals)
+			mesh.RecalculateNormals();
 	}
 
 	private List<int> GenerateShapeTriangles(int verticlesCount)

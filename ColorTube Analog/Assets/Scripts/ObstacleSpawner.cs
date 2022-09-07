@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour
 {
+    [SerializeField] private Ball _ball;
     [SerializeField] private List<ObstacleRotator> _obstacleTemplates;
     [SerializeField] private List<Color> _colors;
     [SerializeField] private int _obstacleCount;
@@ -21,6 +22,8 @@ public class ObstacleSpawner : MonoBehaviour
             Move(-_distanceBetweenObstacles);
         }
 
+        _ball.SetColor(prevBallColor);
+
         //Destroy(gameObject);
     }
 
@@ -30,40 +33,23 @@ public class ObstacleSpawner : MonoBehaviour
         rotation.z = Random.rotation.z;
 
         var element = Instantiate(obstacleRotator, spawnPos, rotation);
-
         Obstacle[] obstacles = element.GetComponentsInChildren<Obstacle>();
-        List<Color> currentColors = _colors;
-        List<Color> newBallColorSelection = new List<Color>();
 
-        int obstacleWitnBallColor = Random.Range(0, obstacles.Length);
-        //obstacles[obstacleWitnBallColor].SetColor(prevBallColor);
+        List<Color> allColors = new List<Color>();
+        allColors.AddRange(_colors);
+
+        List<Color> newBallColorSelection = new List<Color>();
 
         for (int i = 0; i < obstacles.Length; i++)
         {
-            if (i == obstacleWitnBallColor) continue;
+            Color obstacleColor = allColors[Random.Range(0, allColors.Count)];
+            obstacles[i].Init(obstacleColor, prevBallColor);
 
-            Color obstacleColor = currentColors[Random.Range(0, currentColors.Count)];
-            currentColors.Remove(obstacleColor);
+            allColors.Remove(obstacleColor);
             newBallColorSelection.Add(obstacleColor);
-
-            //obstacles[i].SetColor(obstacleColor);
         }
 
         Color nextBallColor = newBallColorSelection[Random.Range(0, newBallColorSelection.Count)];
-
-        foreach (var obstacle in obstacles)
-        {
-           // obstacle.SetNextBallColor(nextBallColor);
-        }
-
-        for (int i = 0; i < obstacles.Length; i++)
-        {
-            if (i == obstacleWitnBallColor)
-            {
-                obstacles[i].Init(newBallColorSelection[i], nextBallColor);
-            }
-        }
-
         return nextBallColor;
     }
 
